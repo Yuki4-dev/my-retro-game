@@ -98,14 +98,7 @@ namespace SuperKiroWorld
         /// <param name="cameraOffset">カメラオフセット</param>
         public void Draw(SpriteBatch spriteBatch, Texture2D texture, Vector2 cameraOffset)
         {
-            // 加算ブレンドで光る効果を実現
-            spriteBatch.Begin(
-                SpriteSortMode.Deferred,
-                BlendState.Additive,
-                SamplerState.PointClamp,
-                null, null, null, null
-            );
-
+            // SpriteBatch.Begin()は呼び出し元で管理されているため、ここでは呼ばない
             foreach (var particle in _particles)
             {
                 // アルファ値をライフに基づいて計算（フェードアウト）
@@ -113,7 +106,7 @@ namespace SuperKiroWorld
                 Color color = particle.Color * alpha;
 
                 // カメラオフセットを適用した描画位置
-                Vector2 drawPosition = particle.Position - cameraOffset;
+                Vector2 drawPosition = particle.Position + cameraOffset;
 
                 // パーティクルを描画
                 spriteBatch.Draw(
@@ -128,8 +121,6 @@ namespace SuperKiroWorld
                     0f
                 );
             }
-
-            spriteBatch.End();
         }
 
         /// <summary>
