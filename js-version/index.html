@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Kiro World</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #0a0a0a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+        #gameContainer {
+            text-align: center;
+        }
+        canvas {
+            border: 3px solid #790ECB;
+            background: #1a1a1a;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 0 20px rgba(121, 14, 203, 0.5);
+        }
+        #ui {
+            display: flex;
+            justify-content: space-around;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            border: 2px solid #790ECB;
+        }
+        .stat {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .stat span {
+            color: #790ECB;
+        }
+        #message {
+            font-size: 24px;
+            margin-top: 10px;
+            min-height: 30px;
+            color: #790ECB;
+        }
+        button {
+            background: #790ECB;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #9a3ee0;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <h1 style="color: #790ECB; margin-bottom: 20px;">🎮 Super Kiro World 🎮</h1>
+        <div id="ui">
+            <div class="stat">スコア: <span id="score">0</span></div>
+            <div class="stat">ライフ: <span id="lives">3</span></div>
+            <div class="stat">コイン: <span id="coins">0</span>/<span id="totalCoins">0</span></div>
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="message"></div>
+        <div id="controls">
+            <p style="color: #aaa;">操作: ← → 移動 | スペース ジャンプ</p>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
