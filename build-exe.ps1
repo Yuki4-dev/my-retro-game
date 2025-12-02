@@ -26,14 +26,12 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Windows x64ビルド
-Write-Host "[3/4] Building Windows x64 executable..." -ForegroundColor Yellow
+Write-Host "[3/5] Building Windows x64 executable..." -ForegroundColor Yellow
 dotnet publish $ProjectPath `
     -c Release `
     -r win-x64 `
     --self-contained true `
-    -p:PublishSingleFile=true `
-    -p:IncludeNativeLibrariesForSelfExtract=true `
-    -p:EnableCompressionInSingleFile=true `
+    -p:PublishSingleFile=false `
     -o "$OutputDir\win-x64"
 
 if ($LASTEXITCODE -ne 0) {
@@ -42,15 +40,16 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
+Write-Host "[3.5/5] Copying Content files for x64..." -ForegroundColor Yellow
+Copy-Item -Path "SuperKiroWorld\Content\bin\DesktopGL\Content" -Destination "$OutputDir\win-x64\Content" -Recurse -Force
+
 # Windows x86ビルド
-Write-Host "[4/4] Building Windows x86 executable..." -ForegroundColor Yellow
+Write-Host "[4/5] Building Windows x86 executable..." -ForegroundColor Yellow
 dotnet publish $ProjectPath `
     -c Release `
     -r win-x86 `
     --self-contained true `
-    -p:PublishSingleFile=true `
-    -p:IncludeNativeLibrariesForSelfExtract=true `
-    -p:EnableCompressionInSingleFile=true `
+    -p:PublishSingleFile=false `
     -o "$OutputDir\win-x86"
 
 if ($LASTEXITCODE -ne 0) {
@@ -58,6 +57,9 @@ if ($LASTEXITCODE -ne 0) {
     Read-Host "Press Enter to exit"
     exit 1
 }
+
+Write-Host "[4.5/5] Copying Content files for x86..." -ForegroundColor Yellow
+Copy-Item -Path "SuperKiroWorld\Content\bin\DesktopGL\Content" -Destination "$OutputDir\win-x86\Content" -Recurse -Force
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green

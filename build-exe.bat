@@ -20,14 +20,12 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [3/4] Building Windows x64 executable...
+echo [3/5] Building Windows x64 executable...
 dotnet publish "%PROJECT_PATH%" ^
     -c Release ^
     -r win-x64 ^
     --self-contained true ^
-    -p:PublishSingleFile=true ^
-    -p:IncludeNativeLibrariesForSelfExtract=true ^
-    -p:EnableCompressionInSingleFile=true ^
+    -p:PublishSingleFile=false ^
     -o "%OUTPUT_DIR%\win-x64"
 
 if errorlevel 1 (
@@ -36,14 +34,15 @@ if errorlevel 1 (
     exit /b 1
 )
 
-echo [4/4] Building Windows x86 executable...
+echo [3.5/5] Copying Content files for x64...
+xcopy /E /I /Y "SuperKiroWorld\Content\bin\DesktopGL\Content" "%OUTPUT_DIR%\win-x64\Content"
+
+echo [4/5] Building Windows x86 executable...
 dotnet publish "%PROJECT_PATH%" ^
     -c Release ^
     -r win-x86 ^
     --self-contained true ^
-    -p:PublishSingleFile=true ^
-    -p:IncludeNativeLibrariesForSelfExtract=true ^
-    -p:EnableCompressionInSingleFile=true ^
+    -p:PublishSingleFile=false ^
     -o "%OUTPUT_DIR%\win-x86"
 
 if errorlevel 1 (
@@ -51,6 +50,9 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
+
+echo [4.5/5] Copying Content files for x86...
+xcopy /E /I /Y "SuperKiroWorld\Content\bin\DesktopGL\Content" "%OUTPUT_DIR%\win-x86\Content"
 
 echo.
 echo ========================================
