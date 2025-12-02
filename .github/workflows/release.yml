@@ -1,0 +1,122 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Get version
+        id: get_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.get_version.outputs.version }}
+          release_name: Super Kiro World ${{ steps.get_version.outputs.version }}
+          body: |
+            ## 🎮 Super Kiro World Release
+            
+            ### Download the game for your platform:
+            - **Windows 64-bit**: SuperKiroWorld-Windows-x64.zip
+            - **Windows 32-bit**: SuperKiroWorld-Windows-x86.zip
+            - **Linux 64-bit**: SuperKiroWorld-Linux-x64.zip
+            - **macOS 64-bit**: SuperKiroWorld-macOS-x64.zip
+            
+            ### How to run:
+            1. Download the appropriate ZIP file for your platform
+            2. Extract the ZIP file
+            3. Run `SuperKiroWorld.exe` (Windows) or `SuperKiroWorld` (Linux/macOS)
+            
+            No .NET installation required - all dependencies are included!
+            
+            ### Controls:
+            - **Move**: Arrow keys or WASD
+            - **Jump**: Space, Up arrow, or W (double jump available!)
+            - **Restart**: R key
+            - **Exit**: Esc key
+          draft: false
+          prerelease: false
+
+  build-and-upload:
+    needs: create-release
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            runtime: win-x64
+            name: Windows-x64
+          - os: windows-latest
+            runtime: win-x86
+            name: Windows-x86
+          - os: ubuntu-latest
+            runtime: linux-x64
+            name: Linux-x64
+          - os: macos-latest
+            runtime: osx-x64
+            name: macOS-x64
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      
+      - name: Publish
+        run: |
+          dotnet publish SuperKiroWorld/SuperKiroWorld.csproj \
+            -c Release \
+            -r ${{ matrix.runtime }} \
+            --self-contained true \
+            -p:PublishSingleFile=true \
+            -p:IncludeNativeLibrariesForSelfExtract=true \
+            -p:EnableCompressionInSingleFile=true \
+            -o ./publish/${{ matrix.runtime }}
+      
+      - name: Create ZIP (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          Compress-Archive -Path ./publish/${{ matrix.runtime }}/* -DestinationPath SuperKiroWorld-${{ matrix.name }}.zip
+      
+      - name: Create ZIP (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cd ./publish/${{ matrix.runtime }}
+          zip -r ../../SuperKiroWorld-${{ matrix.name }}.zip .
+          cd ../..
+      
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create-release.outputs.upload_url }}
+          asset_path: ./SuperKiroWorld-${{ matrix.name }}.zip
+          asset_name: SuperKiroWorld-${{ matrix.name }}.zip
+          asset_content_type: application/zip

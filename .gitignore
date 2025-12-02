@@ -41,3 +41,7 @@ Thumbs.db
 
 # High score data
 highscore.dat
+
+# Build output directory
+build/
+publish/
