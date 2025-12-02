@@ -1,105 +1,107 @@
 # 🎮 Super Kiro World
 
-AWS Re:Invent ワークショップで作成した2Dプラットフォーマーゲームです。MonoGameを使用してC#で実装されています。
+A 2D platformer game created during the AWS Re:Invent workshop. Built with C# and MonoGame for cross-platform desktop gaming.
 
 ![Game Screenshot](SuperKiroWorld/Content/kiro-logo.png)
 
-## 🌟 特徴
+## 🌟 Features
 
-- **クラシックなプラットフォーマー**: 横スクロール型のアクションゲーム
-- **コイン収集システム**: ステージ内のコインを集めてスコアを獲得
-- **ライフシステム**: 3つのライフで挑戦
-- **スムーズなカメラ追従**: プレイヤーを追いかける滑らかなカメラワーク
-- **ハイスコア記録**: 最高得点を保存して更新を目指そう
-- **クロスプラットフォーム対応**: Windows、Mac、Linuxで動作
+- **Classic Platformer**: Side-scrolling action gameplay
+- **Coin Collection System**: Gather coins throughout the stage to earn points
+- **Lives System**: Challenge yourself with 3 lives
+- **Smooth Camera Follow**: Fluid camera tracking that follows the player
+- **High Score Tracking**: Save and beat your best scores
+- **Cross-Platform**: Runs on Windows, Mac, and Linux
 
-## 🎯 ゲームの目的
+## 🎯 Objective
 
-矢印キーまたはWASDキーでキャラクターを操作し、プラットフォームを飛び移りながらコインを集め、ゴールの旗を目指します。落下しないように注意しながら、すべてのコインを集めましょう！
+Control your character using arrow keys or WASD to jump across platforms, collect all coins, and reach the goal flag. Avoid falling off platforms while gathering every coin!
 
-## 🕹️ 操作方法
+## 🕹️ Controls
 
-- **移動**: ← → または A D
-- **ジャンプ**: ↑ または W または スペースキー
-- **リスタート**: R キー
-- **終了**: Esc キー
+- **Move**: ← → or A D
+- **Jump**: ↑ or W or Space
+- **Restart**: R key
+- **Exit**: Esc key
 
-## 🏆 スコアリング
+## 🏆 Scoring
 
-- コイン収集: **100点** / 枚
-- レベルクリア時のライフボーナス: **500点** / ライフ
-- ハイスコアは自動的に保存されます
+- Coin Collection: **100 points** per coin
+- Level Clear Life Bonus: **500 points** per remaining life
+- High scores are automatically saved
 
-## 🛠️ 技術スタック
+## 🛠️ Tech Stack
 
-- **C# (.NET 8.0)** - ゲームロジックと物理演算
-- **MonoGame 3.8+** - クロスプラットフォームゲームフレームワーク
-- **DesktopGL** - OpenGLベースのレンダリング
+- **C# (.NET 8.0)** - Game logic and physics
+- **MonoGame 3.8+** - Cross-platform game framework
+- **DesktopGL** - OpenGL-based rendering
 
-## 🚀 セットアップと実行
+## 🚀 Setup and Running
 
-### 必要な環境
+### Prerequisites
 
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download)
-- MonoGame（プロジェクトに含まれています）
+- MonoGame (included in project dependencies)
 
-### ゲームの実行
+### Running the Game
 
 ```bash
-# プロジェクトディレクトリに移動
+# Navigate to project directory
 cd SuperKiroWorld
 
-# 依存関係の復元
+# Restore dependencies
 dotnet restore
 
-# ゲームの実行
+# Run the game
 dotnet run
 ```
 
-### リリースビルド（より高いパフォーマンス）
+### Release Build (Better Performance)
 
 ```bash
-# リリースモードでビルド
+# Build in Release mode
 dotnet build -c Release
 
-# リリースビルドの実行
+# Run Release build
 dotnet run -c Release
 ```
 
-## 📁 プロジェクト構造
+## 📁 Project Structure
 
 ```
 SuperKiroWorld/
-├── Content/              # ゲームアセット
-│   ├── Content.mgcb     # MonoGame Content Pipeline設定
-│   └── kiro-logo.png    # プレイヤースプライト
-├── Game1.cs             # メインゲームロジック
-├── Program.cs           # エントリーポイント
-├── ScoreManager.cs      # スコア管理システム
-├── Particle.cs          # パーティクルエフェクト
-├── ParticleConfig.cs    # パーティクル設定
-└── SuperKiroWorld.csproj # プロジェクト設定
+├── Content/              # Game assets
+│   ├── Content.mgcb     # MonoGame Content Pipeline config
+│   └── kiro-logo.png    # Player sprite
+├── Game1.cs             # Main game logic
+├── Program.cs           # Entry point
+├── ScoreManager.cs      # Score management system
+├── EffectManager.cs     # Visual effects (screen shake, slow-mo)
+├── Particle.cs          # Particle effects
+├── ParticleEmitter.cs   # Particle emission system
+├── ParticleConfig.cs    # Particle configuration
+└── SuperKiroWorld.csproj # Project configuration
 ```
 
-## 🎨 デザイン
+## 🎨 Design
 
-- **カラースキーム**: Kiroブランドカラー（パープル #790ECB）
-- **ダークテーマ**: 背景色 #1A1A1A
-- **60 FPS**: 滑らかなゲームプレイ
-- **レスポンシブな入力**: 即座に反応する操作感
+- **Color Scheme**: Kiro brand purple (#790ECB)
+- **Dark Theme**: Background #1A1A1A
+- **60 FPS**: Smooth gameplay experience
+- **Responsive Input**: Immediate control feedback
 
-## 🎓 AWS Re:Invent ワークショップについて
+## 🎓 About the AWS Re:Invent Workshop
 
-このゲームはAWS Re:Inventワークショップの一環として開発されました。MonoGameとC#を使用したゲーム開発の基礎を学び、実装しています。
+This game was developed as part of the AWS Re:Invent workshop, demonstrating game development fundamentals using MonoGame and C#.
 
-## 📝 ライセンス
+## 📝 License
 
-このプロジェクトはワークショップ用の教育目的で作成されています。
+This project was created for educational purposes as part of a workshop.
 
-## 🙏 謝辞
+## 🙏 Acknowledgments
 
-AWS Re:Inventワークショップチームとすべての参加者に感謝します！
+Thanks to the AWS Re:Invent workshop team and all participants!
 
 ---
 
-**楽しんでプレイしてください！** 🎮✨
+**Enjoy playing!** 🎮✨
