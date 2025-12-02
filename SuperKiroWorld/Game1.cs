@@ -28,6 +28,7 @@ public class Player
     public Vector2 Size { get; set; } = new Vector2(50, 50);
     public float Speed { get; set; } = 5f;
     public float JumpPower { get; set; } = 12f;
+    public float DoubleJumpPower { get; set; } = 10f; // 2段ジャンプの力（少し弱め）
     public float Gravity { get; set; } = 0.5f;
     public float Friction { get; set; } = 0.8f;
     public bool IsOnGround { get; set; }
@@ -35,6 +36,9 @@ public class Player
     // ジャンプ追跡用フィールド
     public bool IsJumping { get; set; }
     public bool WasOverPlatform { get; set; }
+    public int JumpCount { get; set; } = 0; // 現在のジャンプ回数
+    public int MaxJumps { get; set; } = 2; // 最大ジャンプ回数（1段目 + 2段目）
+    public bool JumpKeyWasPressed { get; set; } = false; // ジャンプキーの前回の状態
 }
 
 // プラットフォーム
@@ -226,15 +230,42 @@ public class Game1 : Game
             _player.Velocity = new Vector2(_player.Velocity.X * _player.Friction, _player.Velocity.Y);
         }
 
-        // ジャンプ
-        if ((keyboardState.IsKeyDown(Keys.Space) || keyboardState.IsKeyDown(Keys.Up) || keyboardState.IsKeyDown(Keys.W)) 
-            && _player.IsOnGround)
+        // ジャンプ（2段ジャンプ対応）
+        bool jumpKeyPressed = keyboardState.IsKeyDown(Keys.Space) || 
+                             keyboardState.IsKeyDown(Keys.Up) || 
+                             keyboardState.IsKeyDown(Keys.W);
+        
+        // ジャンプキーが新しく押された場合のみ処理（連続ジャンプ防止）
+        if (jumpKeyPressed && !_player.JumpKeyWasPressed)
         {
-            _player.Velocity = new Vector2(_player.Velocity.X, -_player.JumpPower);
-            _player.IsOnGround = false;
-            _player.IsJumping = true;
-            _player.WasOverPlatform = false;
+            // 地上からの1段目ジャンプ
+            if (_player.IsOnGround && _player.JumpCount == 0)
+            {
+                _player.Velocity = new Vector2(_player.Velocity.X, -_player.JumpPower);
+                _player.IsOnGround = false;
+                _player.IsJumping = true;
+                _player.WasOverPlatform = false;
+                _player.JumpCount = 1;
+                
+                // 1段目ジャンプのエフェクト（小さめ）
+                Vector2 jumpPosition = _player.Position + new Vector2(_player.Size.X / 2, _player.Size.Y);
+                _effectManager.CreateExplosionEffect(jumpPosition);
+            }
+            // 空中での2段目ジャンプ
+            else if (!_player.IsOnGround && _player.JumpCount < _player.MaxJumps)
+            {
+                _player.Velocity = new Vector2(_player.Velocity.X, -_player.DoubleJumpPower);
+                _player.JumpCount = 2;
+                
+                // 2段ジャンプのエフェクト（派手に）
+                Vector2 doubleJumpPosition = _player.Position + _player.Size / 2;
+                _effectManager.CreateSparkleEffect(doubleJumpPosition);
+                // 追加で小さな爆発も
+                _effectManager.CreateExplosionEffect(doubleJumpPosition);
+            }
         }
+        
+        _player.JumpKeyWasPressed = jumpKeyPressed;
 
         // 重力適用
         _player.Velocity = new Vector2(_player.Velocity.X, _player.Velocity.Y + _player.Gravity);
@@ -291,9 +322,10 @@ public class Game1 : Game
                     _player.Velocity = new Vector2(_player.Velocity.X, 0);
                     _player.IsOnGround = true;
                     
-                    // 着地時にジャンプフラグをリセット
+                    // 着地時にジャンプフラグとカウントをリセット
                     _player.IsJumping = false;
                     _player.WasOverPlatform = false;
+                    _player.JumpCount = 0;
                 }
                 // 下から衝突
                 else if (_player.Velocity.Y < 0 && _player.Position.Y - _player.Velocity.Y >= platform.Bounds.Y + platform.Bounds.Height)
@@ -399,6 +431,10 @@ public class Game1 : Game
     {
         _player.Position = new Vector2(100, 100);
         _player.Velocity = Vector2.Zero;
+        _player.JumpCount = 0;
+        _player.IsJumping = false;
+        _player.WasOverPlatform = false;
+        _player.JumpKeyWasPressed = false;
         _gameState.Camera = Vector2.Zero;
     }
 
