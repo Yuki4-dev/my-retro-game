@@ -31,6 +31,10 @@ public class Player
     public float Gravity { get; set; } = 0.5f;
     public float Friction { get; set; } = 0.8f;
     public bool IsOnGround { get; set; }
+    
+    // ジャンプ追跡用フィールド
+    public bool IsJumping { get; set; }
+    public bool WasOverPlatform { get; set; }
 }
 
 // プラットフォーム
@@ -54,7 +58,6 @@ public class Game1 : Game
     private SpriteBatch _spriteBatch;
     private Texture2D _playerTexture;
     private Texture2D _pixelTexture;
-    private SpriteFont _font;
 
     private GameState _gameState;
     private Player _player;
@@ -62,6 +65,7 @@ public class Game1 : Game
     private List<Coin> _coins;
     private Rectangle _goal;
     private ScoreManager _scoreManager;
+    private EffectManager _effectManager;
 
     private KeyboardState _previousKeyboardState;
 
@@ -85,6 +89,10 @@ public class Game1 : Game
         _scoreManager = new ScoreManager();
         _scoreManager.LoadHighScore();
         _gameState.HighScore = _scoreManager.HighScore;
+        
+        // EffectManager初期化
+        _effectManager = new EffectManager();
+        _effectManager.Initialize();
         
         // プレイヤー初期化
         _player = new Player
@@ -194,6 +202,9 @@ public class Game1 : Game
             UpdatePlayer(keyboardState);
             UpdateCamera();
         }
+        
+        // エフェクトマネージャーを更新
+        _effectManager.Update((float)gameTime.ElapsedGameTime.TotalSeconds);
 
         _previousKeyboardState = keyboardState;
         base.Update(gameTime);
@@ -221,6 +232,8 @@ public class Game1 : Game
         {
             _player.Velocity = new Vector2(_player.Velocity.X, -_player.JumpPower);
             _player.IsOnGround = false;
+            _player.IsJumping = true;
+            _player.WasOverPlatform = false;
         }
 
         // 重力適用
@@ -228,6 +241,15 @@ public class Game1 : Game
 
         // 位置更新
         _player.Position += _player.Velocity;
+        
+        // トレイルエフェクト生成（速度閾値: 2.0以上）
+        float speed = _player.Velocity.Length();
+        if (speed >= 2.0f)
+        {
+            // プレイヤーの中心位置からトレイルを生成
+            Vector2 trailPosition = _player.Position + _player.Size / 2;
+            _effectManager.CreateTrailEffect(trailPosition, _player.Velocity);
+        }
 
         // 地面判定リセット
         _player.IsOnGround = false;
@@ -235,6 +257,28 @@ public class Game1 : Game
         // プラットフォーム衝突判定
         var playerRect = new Rectangle((int)_player.Position.X, (int)_player.Position.Y, 
                                        (int)_player.Size.X, (int)_player.Size.Y);
+
+        // ジャンプ成功検出：プレイヤーがプラットフォームの上空を通過しているかチェック
+        foreach (var platform in _platforms)
+        {
+            // プレイヤーがプラットフォームの上空にいるかチェック
+            // X座標が重なっていて、Y座標がプラットフォームより上にある場合
+            if (_player.Position.X + _player.Size.X > platform.Bounds.X &&
+                _player.Position.X < platform.Bounds.X + platform.Bounds.Width &&
+                _player.Position.Y + _player.Size.Y < platform.Bounds.Y &&
+                _player.Position.Y + _player.Size.Y > platform.Bounds.Y - 100) // プラットフォームの近く
+            {
+                // ジャンプ中で、プラットフォーム上空を通過した場合
+                if (_player.IsJumping && !_player.WasOverPlatform)
+                {
+                    _player.WasOverPlatform = true;
+                    // スパークルエフェクトを生成（プレイヤーの中心位置）
+                    Vector2 sparklePosition = _player.Position + _player.Size / 2;
+                    _effectManager.CreateSparkleEffect(sparklePosition);
+                }
+                break;
+            }
+        }
 
         foreach (var platform in _platforms)
         {
@@ -246,20 +290,48 @@ public class Game1 : Game
                     _player.Position = new Vector2(_player.Position.X, platform.Bounds.Y - _player.Size.Y);
                     _player.Velocity = new Vector2(_player.Velocity.X, 0);
                     _player.IsOnGround = true;
+                    
+                    // 着地時にジャンプフラグをリセット
+                    _player.IsJumping = false;
+                    _player.WasOverPlatform = false;
                 }
                 // 下から衝突
                 else if (_player.Velocity.Y < 0 && _player.Position.Y - _player.Velocity.Y >= platform.Bounds.Y + platform.Bounds.Height)
                 {
+                    // 衝突点を計算（プレイヤーの上端中央とプラットフォームの下端）
+                    Vector2 collisionPoint = new Vector2(
+                        _player.Position.X + _player.Size.X / 2,
+                        platform.Bounds.Y + platform.Bounds.Height
+                    );
+                    _effectManager.CreateExplosionEffect(collisionPoint);
+                    
                     _player.Position = new Vector2(_player.Position.X, platform.Bounds.Y + platform.Bounds.Height);
                     _player.Velocity = new Vector2(_player.Velocity.X, 0);
                 }
                 // 横から衝突
                 else
                 {
+                    Vector2 collisionPoint;
                     if (_player.Velocity.X > 0)
+                    {
+                        // 右から衝突：プレイヤーの右端中央とプラットフォームの左端
+                        collisionPoint = new Vector2(
+                            platform.Bounds.X,
+                            _player.Position.Y + _player.Size.Y / 2
+                        );
+                        _effectManager.CreateExplosionEffect(collisionPoint);
                         _player.Position = new Vector2(platform.Bounds.X - _player.Size.X, _player.Position.Y);
+                    }
                     else if (_player.Velocity.X < 0)
+                    {
+                        // 左から衝突：プレイヤーの左端中央とプラットフォームの右端
+                        collisionPoint = new Vector2(
+                            platform.Bounds.X + platform.Bounds.Width,
+                            _player.Position.Y + _player.Size.Y / 2
+                        );
+                        _effectManager.CreateExplosionEffect(collisionPoint);
                         _player.Position = new Vector2(platform.Bounds.X + platform.Bounds.Width, _player.Position.Y);
+                    }
                     _player.Velocity = new Vector2(0, _player.Velocity.Y);
                 }
             }
@@ -341,6 +413,9 @@ public class Game1 : Game
         {
             _gameState.IsNewHighScore = true;
             _gameState.HighScore = _scoreManager.HighScore;
+            
+            // 新記録の場合、紙吹雪エフェクトを生成（画面幅800を渡す）
+            _effectManager.CreateConfettiEffect(800);
         }
     }
 
@@ -368,9 +443,16 @@ public class Game1 : Game
         // カメラ変換を適用して描画
         DrawGame();
         
+        _spriteBatch.End();
+        
+        // エフェクト描画（加算ブレンドを使用）
+        _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.Additive);
+        _effectManager.Draw(_spriteBatch, _pixelTexture, new Vector2(-_gameState.Camera.X, 0));
+        _spriteBatch.End();
+        
         // UI描画（カメラ影響なし）
+        _spriteBatch.Begin();
         DrawUI();
-
         _spriteBatch.End();
 
         base.Draw(gameTime);
@@ -426,20 +508,21 @@ public class Game1 : Game
 
         if (_gameState.IsGameOver)
         {
-            string message = "ゲームオーバー！ Rキーでリスタート";
-            // 中央に表示
+            // ゲームオーバーメッセージの背景
             _spriteBatch.Draw(_pixelTexture, new Rectangle(200, 250, 400, 100), new Color(121, 14, 203));
         }
         else if (_gameState.IsLevelComplete)
         {
-            string message = $"レベルクリア！ 最終スコア: {_gameState.Score}";
+            // レベルクリアメッセージの背景
             _spriteBatch.Draw(_pixelTexture, new Rectangle(200, 250, 400, 100), new Color(121, 14, 203));
             
-            // 新記録の場合は追加メッセージ
+            // 新記録の場合は追加メッセージを表示
             if (_gameState.IsNewHighScore)
             {
-                string newRecordMessage = "新記録！";
-                _spriteBatch.Draw(_pixelTexture, new Rectangle(250, 370, 300, 50), Color.Gold);
+                // ゴールドの背景で目立たせる
+                _spriteBatch.Draw(_pixelTexture, new Rectangle(250, 370, 300, 60), Color.Gold);
+                // 内側に濃い紫の枠を追加して「新記録！」の視覚的インパクトを強化
+                _spriteBatch.Draw(_pixelTexture, new Rectangle(255, 375, 290, 50), new Color(121, 14, 203));
             }
         }
     }

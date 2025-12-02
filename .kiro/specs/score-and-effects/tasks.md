@@ -73,7 +73,9 @@
     - CreateConfettiConfig() - 複数色、重力あり、回転あり
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 5.1, 5.2, 5.3_
 
-- [-] 5. ParticleEmitterクラスの実装
+- [x] 5. ParticleEmitterクラスの実装
+
+
 
 
 
@@ -89,8 +91,13 @@
 - [ ]* 5.1 ParticleEmitterのプロパティベーステストを作成
   - **Property 5: パーティクル数の上限**
   - **Validates: Requirements 2.1, 2.2, 3.1, 3.2, 4.1, 5.1**
+- [x] 6. EffectManagerクラスの実装
+
+
+
 
 - [ ] 6. EffectManagerクラスの実装
+
   - SuperKiroWorld/EffectManager.csファイルを作成
   - 各エフェクトタイプ用のParticleEmitterフィールドを定義（trail, explosion, sparkle, confetti）
   - Initialize(GraphicsDevice)メソッドで各エミッターを初期化
@@ -102,7 +109,12 @@
   - Draw(SpriteBatch spriteBatch, Texture2D texture, Vector2 cameraOffset)メソッドで全エミッターを描画
   - _Requirements: 2.1, 2.2, 2.5, 3.1, 3.2, 3.3, 4.1, 5.1, 5.3_
 
-- [ ] 7. トレイルエフェクトの統合
+- [x] 7. トレイルエフェクトの統合
+
+
+
+
+
   - Game1.csにEffectManagerのインスタンスフィールドを追加
   - Initialize()メソッドでEffectManagerを初期化
   - UpdatePlayer()メソッドにトレイル生成ロジックを追加（速度閾値: 2.0以上）
@@ -117,7 +129,12 @@
   - **Property 8: トレイル色の一貫性**
   - **Validates: Requirements 2.1, 2.2, 2.4, 2.5**
 
-- [ ] 8. 衝突エフェクトの統合
+- [x] 8. 衝突エフェクトの統合
+
+
+
+
+
   - UpdatePlayer()メソッドの衝突検出部分に爆発エフェクト生成を追加
   - 横からの衝突時: 衝突点でCreateExplosionEffect()を呼び出し
   - 下からの衝突時: 衝突点でCreateExplosionEffect()を呼び出し
@@ -128,8 +145,13 @@
   - **Property 9: 衝突時の爆発生成**
   - **Property 10: 爆発の放射パターン**
   - **Validates: Requirements 3.1, 3.2, 3.3**
+- [x] 9. スパークルエフェクトの統合
+
+
+
 
 - [ ] 9. スパークルエフェクトの統合
+
   - Playerクラスにジャンプ追跡用のフィールドを追加（IsJumping, WasOverPlatform）
   - UpdatePlayer()メソッドにジャンプ成功検出ロジックを追加
   - プラットフォームを飛び越えた時（空中 && プラットフォーム上空通過）にCreateSparkleEffect()を呼び出し
@@ -141,8 +163,13 @@
   - **Property 11: ジャンプ成功時のスパークル**
   - **Property 12: 着地時のスパークル停止**
   - **Validates: Requirements 4.1, 4.5**
+-
 
-- [ ] 10. 紙吹雪エフェクトの統合
+- [x] 10. 紙吹雪エフェクトの統合
+
+
+
+
   - LevelComplete()メソッドでCheckAndUpdateHighScore()の結果を確認
   - 新記録の場合、CreateConfettiEffect()を呼び出し（画面幅800を渡す）
   - GameState.IsNewHighScoreフラグを設定
@@ -156,8 +183,11 @@
   - **Property 14: 紙吹雪の重力適用**
   - **Property 15: 画面外パーティクルの削除**
   - **Validates: Requirements 5.1, 5.3, 5.4**
+-
 
-- [ ] 11. チェックポイント - 全機能の動作確認
+- [-] 11. チェックポイント - 全機能の動作確認
+
+
   - ゲームを実行してハイスコア保存が正常に動作することを確認
   - 各エフェクト（トレイル、爆発、スパークル、紙吹雪）が正しく表示されることを確認
   - 60 FPSが維持されていることを確認
